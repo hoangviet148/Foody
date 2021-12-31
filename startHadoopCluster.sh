@@ -35,11 +35,16 @@ docker exec -it $HADOOP_MASTER "/usr/local/hadoop/spark-services.sh"
 
 # START RABBITMQ
 docker run --name rabbitmq -h rabbitmq --net=$NETWORK_NAME \
-	-p 5672:5672 -p 15672:15672 \
-	-itd rabbitmq:3-management
+	-p 5672:5672 -p 15672:15672 -p 1883:1883 \
+	-itd rabbit_mqtt
 
 # START ELASTICSEARCH - KIBANA
+docker run --name elasticsearch -h elasticsearch --net=$NETWORK_NAME \
+	-v ./elasticsearch/data:/usr/share/elasticsearch/data \
+	-itd docker.elastic.co/elasticsearch/elasticsearch:7.9.2-amd64
 
-
+docker run --name kibana -h kibana --net=$NETWORK_NAME \
+	-p 5601:5601 \
+	-itd docker.elastic.co/kibana/kibana:7.9.2
 
 

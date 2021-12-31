@@ -44,7 +44,7 @@ spark-shell --master yarn --deploy-mode client
 ```
 #### spark submit 
 ```bash
-spark-submit --master yarn --deploy-mode [client or cluster] --num-executors 2 --executor-memory 4G --executor-cores 4 --class org.apache.spark.examples.SparkPi $SPARK_HOME/examples/jars/spark-examples_2.11-2.4.1.jar
+spark-submit --master yarn --deploy-mode client --packages  org.apache.bahir:spark-streaming-mqtt_2.11:2.4.0 --num-executors 1 --executor-memory 1G --executor-cores 1  /app/consumer.py
 ```
 #### Web UI 
 - Get master node ip: 
