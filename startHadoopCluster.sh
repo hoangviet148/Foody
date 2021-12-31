@@ -41,10 +41,12 @@ docker run --name rabbitmq -h rabbitmq --net=$NETWORK_NAME \
 # START ELASTICSEARCH - KIBANA
 docker run --name elasticsearch -h elasticsearch --net=$NETWORK_NAME \
 	-v ./elasticsearch/data:/usr/share/elasticsearch/data \
+	-e ./elasticsearch/elasticsearch.env \
 	-itd docker.elastic.co/elasticsearch/elasticsearch:7.9.2-amd64
 
 docker run --name kibana -h kibana --net=$NETWORK_NAME \
 	-p 5601:5601 \
+	-e ./elasticsearch/kibana.env \
 	-itd docker.elastic.co/kibana/kibana:7.9.2
 
 
