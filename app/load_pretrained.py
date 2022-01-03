@@ -8,9 +8,33 @@ from pyspark.ml.classification import LogisticRegression, LogisticRegressionMode
 from pyspark.ml import Pipeline, PipelineModel
 from pyspark.ml.feature import OneHotEncoder, StringIndexer, VectorAssembler
 from pyspark.ml.feature import HashingTF, IDF
+from pyspark.context import SparkContext
+from pyspark import SparkConf
+from pyspark.sql import SQLContext
 
-#dataset = spark.read.option("header",True).option("multiLine",True).option("delimiter", ",").csv#("/content/drive/My Drive/20212/PySpark/data/data_clean_v3.csv")
+from pyspark.sql.session import SparkSession
+sc = SparkContext.getOrCreate()
+spark = SparkSession(sc)
 
+# read data from es
+conf = SparkConf().setAppName("ESTest")
+sc = SparkContext.getOrCreate()
+sqlContext = SQLContext(sc)
+
+es_reader = (spark.read
+    .format("org.elasticsearch.spark.sql")
+    .option("inferSchema", "true")
+    .option("es.read.field.as.array.include", "tags")
+    .option("es.nodes","elasticsearch:9200")
+    .option("es.net.http.auth.user","elastic")
+)
+
+sysmon_df = es_reader.load("sedu/")
+sysmon_df.printSchema()
+
+dataset = spark.read.option("header",True).option("multiLine",True).option("delimiter", ",").csv("./data-test/data_clean_v3.csv")
+
+# 
 def unionAll(dfs):
     return functools.reduce(lambda df1, df2: df1.union(df2.select(df1.columns)), dfs)
 
@@ -35,8 +59,9 @@ unioned_df = pre_processing(dataset)
 unioned_df = unioned_df.withColumn("clean_data",udf_star_desc(col("concat")))
 unioned_df = unioned_df.drop('concat')
 
-pipeline = PipelineModel.load("/content/drive/My Drive/20212/PySpark/pipeline_1")
-model = LogisticRegressionModel.load("/content/drive/My Drive/20212/PySpark/logistic_regression_1")
+pipeline = PipelineModel.load("./preTrained/pipeline_1")
+model = LogisticRegressionModel.load("./preTrained/logistic_regression_1")
 
 dataset = pipeline.transform(unioned_df)
 predictions = model.transform(dataset)
+predictions.show()

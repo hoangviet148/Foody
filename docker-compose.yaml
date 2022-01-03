@@ -40,7 +40,8 @@ services:
           cpus: '1'
           memory: 4096M
     volumes:
-      - './notebook:/usr/zeppelin/notebook'
+      - "./app:/app"
+      - "./preTrained:/app/preTrained"
 
   spark_worker_01:
     container_name: spark_worker_01
