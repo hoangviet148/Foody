@@ -31,21 +31,22 @@ es_reader = (spark.read
 
 sysmon_df = es_reader.load("sedu/")
 sysmon_df.printSchema()
+dataset = spark.read.option("header",True).option("multiLine",True).option("delimiter", ",").csv("/content/drive/My Drive/20212/PySpark/data/Phu Yen_gacomment.csv")
 
-dataset = spark.read.option("header",True).option("multiLine",True).option("delimiter", ",").csv("./data-test/data_clean_v3.csv")
+cmt = dataset.select("Bình Luận")
+cmt = cmt.withColumnRenamed("Bình Luận","concat")
 
-# 
 def unionAll(dfs):
     return functools.reduce(lambda df1, df2: df1.union(df2.select(df1.columns)), dfs)
 
-def pre_processing(dataset):
-    dataset = dataset.na.drop()
-    dataset_0 = dataset.filter(dataset.mark_standard == '0')
-    dataset_1 = dataset.filter(dataset.mark_standard == '1')
-    dataset_2 = dataset.filter(dataset.mark_standard == '2')
-    unioned_df = unionAll([dataset_0, dataset_1, dataset_2])
+# def pre_processing(dataset):
+#     dataset = dataset.na.drop()
+#     dataset_0 = dataset.filter(dataset.mark_standard == '0')
+#     dataset_1 = dataset.filter(dataset.mark_standard == '1')
+#     dataset_2 = dataset.filter(dataset.mark_standard == '2')
+#     unioned_df = unionAll([dataset_0, dataset_1, dataset_2])
 
-    return unioned_df
+#     return unioned_df
 
 def segmentation_remove_punctuation(value):
     punc = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
@@ -53,9 +54,10 @@ def segmentation_remove_punctuation(value):
         value = value.replace(ch, ' ')
     return value
 
-udf_star_desc = udf(lambda x:segmentation_remove_punctuation(x),StringType() )
+udf_star_desc = udf(lambda x:segmentation_remove_punctuation(x),StringType())
 
-unioned_df = pre_processing(dataset)
+# unioned_df = pre_processing(dataset)
+unioned_df = cmt
 unioned_df = unioned_df.withColumn("clean_data",udf_star_desc(col("concat")))
 unioned_df = unioned_df.drop('concat')
 
