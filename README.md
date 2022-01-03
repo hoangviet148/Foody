@@ -37,10 +37,10 @@ root@cluster-master:/#
 ```
 ### Run spark applications on cluster : 
 Once connected to the master node
- 
-#### spark-shell
-```bash 
-spark-shell --master yarn --deploy-mode client
+
+### create python-is-python3
+```
+ln -s /usr/bin/python3 /usr/bin/python
 ```
 #### spark submit 
 ```bash
