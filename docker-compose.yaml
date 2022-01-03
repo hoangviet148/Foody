@@ -126,51 +126,32 @@ services:
     restart: "always"
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2-amd64
     container_name: elasticsearch
     environment:
       - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - http.cors.enabled=true
-      - http.cors.allow-origin=*
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    build:
-      context: ./dockerfile-folder
-      dockerfile: Dockerfile.elasticsearch
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
+      - network.host=0.0.0.0
+      # - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      # - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    # build:
+    #   context: ./dockerfile-folder
+    #   dockerfile: Dockerfile.elasticsearch
+    # ulimits:
+    #   memlock:
+    #     soft: -1
+    #     hard: -1
     volumes:
-      - './elasticsearch/esdata1:/usr/share/elasticsearch/data'
+      - './elasticsearch/esdata:/usr/share/elasticsearch/data'
     ports:
       - 9200:9200
 
-  elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
-    container_name: elasticsearch2
-    build:
-      context: ./dockerfile-folder
-      dockerfile: Dockerfile.elasticsearch
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - http.cors.enabled=true
-      - http.cors.allow-origin=*
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=elasticsearch"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - './elasticsearch/esdata2:/usr/share/elasticsearch/data'
-
   kibana:
-    image: 'docker.elastic.co/kibana/kibana:6.3.2'
+    image: docker.elastic.co/kibana/kibana:7.9.2
     container_name: kibana
     environment:
       SERVER_NAME: kibana.local
       ELASTICSEARCH_URL: http://elasticsearch:9200
+      XPACK_SECURITY_ENABLED: "false"
     ports:
       - '5601:5601'
