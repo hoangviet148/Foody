@@ -41,7 +41,7 @@ services:
           memory: 4096M
     volumes:
       - "./app:/app"
-      - "./preTrained:/app/preTrained"
+      - "./app/pre_trained:/app/pre_trained"
 
   spark_worker_01:
     container_name: spark_worker_01

@@ -13,8 +13,6 @@ channel = connection.channel()
 
 channel.exchange_declare(exchange='amq.topic', exchange_type='topic', durable=True)
 
-# data = {'name': 'minh', 'age': 18}
-# data = json.dumps(data, indent=4)
 data = "ngo viet hoang tran tan minh"
 for i in range(5):
     channel.basic_publish(

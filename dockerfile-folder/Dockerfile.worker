@@ -3,7 +3,7 @@ FROM dylanmei/zeppelin
 RUN printf "deb http://archive.debian.org/debian/ jessie main\ndeb-src http://archive.debian.org/debian/ jessie main\ndeb http://security.debian.org jessie/updates main\ndeb-src http://security.debian.org jessie/updates main" > /etc/apt/sources.list
 RUN apt-get update -y
 RUN apt install nano -y --force-yes
-RUN apt install iputils-ping -y
+# RUN apt install iputils-ping -y
 # COPY wordcount.py .
 
 EXPOSE 4040 6066 7077 8080 18080 8081 80
