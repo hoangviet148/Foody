@@ -39,31 +39,37 @@ cmt = cmt.withColumnRenamed("Bình Luận","concat")
 def unionAll(dfs):
     return functools.reduce(lambda df1, df2: df1.union(df2.select(df1.columns)), dfs)
 
-# def pre_processing(dataset):
-#     dataset = dataset.na.drop()
-#     dataset_0 = dataset.filter(dataset.mark_standard == '0')
-#     dataset_1 = dataset.filter(dataset.mark_standard == '1')
-#     dataset_2 = dataset.filter(dataset.mark_standard == '2')
-#     unioned_df = unionAll([dataset_0, dataset_1, dataset_2])
-
-#     return unioned_df
-
 def segmentation_remove_punctuation(value):
     punc = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
-    for ch in punc:
-        value = value.replace(ch, ' ')
+    if value is None:
+        return "no data"
+    else:
+        for ch in punc:
+            value = value.replace(ch, ' ')
     return value
+        
 
 udf_star_desc = udf(lambda x:segmentation_remove_punctuation(x),StringType())
-
 # unioned_df = pre_processing(dataset)
-unioned_df = cmt
-unioned_df = unioned_df.withColumn("clean_data",udf_star_desc(col("concat")))
+unioned_d = cmt
+unioned_df = unioned_d.withColumn("clean_data",udf_star_desc(col("concat")))
 unioned_df = unioned_df.drop('concat')
+
+df_split = unioned_df.select(split(col("clean_data"),"sep").alias("split_cmt")) \
+    .drop("clean_data")
+
+df_flatten= df_split.withColumn('split_cmt', explode('split_cmt'))
+
+df_flatten = df_flatten.withColumnRenamed("split_cmt","clean_data")
 
 pipeline = PipelineModel.load("./preTrained/pipeline_1")
 model = LogisticRegressionModel.load("./preTrained/logistic_regression_1")
 
-dataset = pipeline.transform(unioned_df)
+dataset = pipeline.transform(df_flatten)
 predictions = model.transform(dataset)
+predictions = predictions.select('clean_data','prediction')
+predictions = predictions.withColumnRenamed("clean_data","Bình Luận")
+predictions = predictions.na.drop()
+predictions = predictions.filter(col("Bình Luận") != "no data")
+
 predictions.show()
